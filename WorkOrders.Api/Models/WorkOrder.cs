@@ -13,4 +13,6 @@ public class WorkOrder
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    public List<Cost> Costs { get; set; } = new();
 }

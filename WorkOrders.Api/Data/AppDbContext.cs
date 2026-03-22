@@ -10,5 +10,6 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
+    public DbSet<WorkOrder> WorkOrders { get; set; }
+    public DbSet<Cost> Costs { get; set; }
 }
