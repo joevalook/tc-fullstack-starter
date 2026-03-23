@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkOrders.Api.Dtos;
 using WorkOrders.Api.Services.Interfaces;
@@ -6,6 +7,7 @@ namespace WorkOrders.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class WorkOrdersController : ControllerBase
 {
     private readonly IWorkOrderService _workOrderService;

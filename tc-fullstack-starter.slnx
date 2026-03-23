@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="WorkOrders.Api.Tests/WorkOrders.Api.Tests.csproj" />
+  <Project Path="WorkOrders.Api/WorkOrders.Api.csproj" />
+</Solution>
