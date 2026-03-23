@@ -3,10 +3,11 @@ import { login, register } from "./api/auth";
 import { getWorkOrders } from "./api/workOrders";
 import { getToken, removeToken, saveToken } from "./utils/auth";
 
+import AuthForm from "./components/AuthForm";
+import WorkOrderList from "./components/WorkOrderList";
+
 function App() {
   const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [token, setToken] = useState(getToken());
   const [workOrders, setWorkOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,19 +16,15 @@ function App() {
   const [authMessage, setAuthMessage] = useState("");
 
   useEffect(() => {
-    const loadWorkOrders = async () => {
-      if (!token) {
-        setWorkOrders([]);
-        return;
-      }
+    if (!token) return;
 
+    const loadWorkOrders = async () => {
       try {
         setLoading(true);
-        setError("");
         const data = await getWorkOrders();
         setWorkOrders(data);
       } catch (err) {
-        setError(err.message || "Failed to load work orders");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -36,9 +33,7 @@ function App() {
     loadWorkOrders();
   }, [token]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
+  const handleAuthSubmit = async (email, password) => {
     try {
       setAuthLoading(true);
       setError("");
@@ -48,24 +43,19 @@ function App() {
         const data = await login(email, password);
         saveToken(data.token);
         setToken(data.token);
-        setAuthMessage("Logged in successfully.");
       } else {
         const data = await register(email, password);
 
         if (data.token) {
           saveToken(data.token);
           setToken(data.token);
-          setAuthMessage("Account created and logged in.");
         } else {
-          setAuthMessage("Account created. You can now log in.");
           setMode("login");
+          setAuthMessage("Account created. Please log in.");
         }
       }
-
-      setEmail("");
-      setPassword("");
     } catch (err) {
-      setError(err.message || "Authentication failed");
+      setError(err.message);
     } finally {
       setAuthLoading(false);
     }
@@ -75,71 +65,25 @@ function App() {
     removeToken();
     setToken(null);
     setWorkOrders([]);
-    setAuthMessage("Logged out.");
-    setError("");
   };
 
   if (!token) {
     return (
       <div className="container">
         <h1>Work Orders App</h1>
-        <div className="card">
-          <div className="tabs">
-            <button
-              className={mode === "login" ? "active" : ""}
-              onClick={() => {
-                setMode("login");
-                setError("");
-                setAuthMessage("");
-              }}
-            >
-              Login
-            </button>
-            <button
-              className={mode === "signup" ? "active" : ""}
-              onClick={() => {
-                setMode("signup");
-                setError("");
-                setAuthMessage("");
-              }}
-            >
-              Sign Up
-            </button>
-          </div>
 
-          <form onSubmit={handleSubmit} className="form">
-            <label>
-              Email
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </label>
-
-            <label>
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-            </label>
-
-            <button type="submit" disabled={authLoading}>
-              {authLoading
-                ? "Submitting..."
-                : mode === "login"
-                ? "Login"
-                : "Create Account"}
-            </button>
-          </form>
-
-          {authMessage && <p className="success">{authMessage}</p>}
-          {error && <p className="error">{error}</p>}
-        </div>
+        <AuthForm
+          mode={mode}
+          onSubmit={handleAuthSubmit}
+          loading={authLoading}
+          error={error}
+          message={authMessage}
+          onModeChange={(newMode) => {
+            setMode(newMode);
+            setError("");
+            setAuthMessage("");
+          }}
+        />
       </div>
     );
   }
@@ -151,26 +95,9 @@ function App() {
         <button onClick={handleLogout}>Logout</button>
       </div>
 
-      {authMessage && <p className="success">{authMessage}</p>}
       {error && <p className="error">{error}</p>}
 
-      {loading ? (
-        <p>Loading work orders...</p>
-      ) : workOrders.length === 0 ? (
-        <p>No work orders found.</p>
-      ) : (
-        <ul className="workorder-list">
-          {workOrders.map((workOrder) => (
-            <li key={workOrder.id} className="card">
-              <h3>{workOrder.title}</h3>
-              <p>Status: {workOrder.status}</p>
-              {workOrder.description && (
-                <p>Description: {workOrder.description}</p>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      <WorkOrderList workOrders={workOrders} loading={loading} />
     </div>
   );
 }
