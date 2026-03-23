@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkOrders.Api.Dtos;
 using WorkOrders.Api.Services.Interfaces;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace WorkOrders.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("api")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
